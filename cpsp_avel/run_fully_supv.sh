@@ -17,7 +17,7 @@ VIS_FEA_DIR="your visual feature path" # should be modified
 
 
 
-python ../fully_supv_main.py \
+python fully_supv_main.py \
 --lr 0.001 \
 --clip_gradient 0.1 \
 --seed ${SEED} \
