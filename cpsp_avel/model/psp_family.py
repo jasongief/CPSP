@@ -1,10 +1,12 @@
 import torch
+import torch.autograd as autograd
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 from torch.nn import init
+# import torchvision.models as models
 
 import pdb
-
 
 def init_layers(layers):
     for layer in layers:
@@ -147,7 +149,6 @@ class PSP(nn.Module):
         beta_va = torch.bmm(v_branch2, a_branch1.permute(0, 2, 1)) # row(v) - col(a), [bs, 10, 10]
         beta_va /= torch.sqrt(torch.FloatTensor([v_branch2.shape[2]]).cuda())
         # beta_va /= torch.sqrt(torch.FloatTensor([v_branch2.shape[2]]))
-
         beta_va = F.relu(beta_va) # ReLU
         beta_av = beta_va.permute(0, 2, 1) # transpose
 
@@ -289,6 +290,10 @@ class weakly_psp_net(nn.Module):
     def __init__(self, vis_fea_type='vgg', flag='psp', a_dim=128, v_dim=512, hidden_dim=128, category_num=29, pooling_type='avg', thr_val=0.095):
         super(weakly_psp_net, self).__init__()
         self.vis_fea_type = vis_fea_type
+        if self.vis_fea_type == 'vgg':
+            self.v_init_dim = 512
+        else:
+            self.v_init_dim = 1024
         self.flag = flag
         self.pooling_type = pooling_type
         self.thr_val = thr_val
@@ -297,12 +302,12 @@ class weakly_psp_net(nn.Module):
             nn.Linear(256, 128, bias=False),
         )
         self.fv = nn.Sequential(
-            nn.Linear(v_dim, 256, bias=False),
+            nn.Linear(self.v_init_dim, 256, bias=False),
             nn.Linear(256, 128, bias=False),
         )
         self.linear_v = nn.Linear(v_dim, a_dim)
         self.relu = nn.ReLU()
-        self.attention = AVGA(v_dim=v_dim)
+        self.attention = AVGA(v_dim=self.v_init_dim)
         self.lstm_a_v = LSTM_A_V(a_dim=a_dim, v_dim=hidden_dim, hidden_dim=hidden_dim)
         self.psp = PSP(a_dim=a_dim*2, v_dim=hidden_dim*2)
 
@@ -376,12 +381,14 @@ class resnet_psp_net(nn.Module):
         # audio_lm: [B, T, 128]
         # get visual feature map for psp
         # pdb.set_trace()
-        B, T, C, H, W = imgs.shape
-        x = imgs.reshape(-1, C, H, W) # [BT, 1024, H, W]
-        x = x.permute(0, 2, 3, 1) # [BT, H, W, 1024]
-        v_map = self.align_v(x) # BT x h x w x 512
-        _, h, w, c = v_map.shape
-        v_map = v_map.view(B, T, h, w, c) # [B, T, h, w, c]
+        # pdb.set_trace()
+        # B, T, C, H, W = imgs.shape
+        # x = imgs.reshape(-1, C, H, W) # [BT, 1024, H, W]
+        # x = x.permute(0, 2, 3, 1) # [BT, H, W, 1024]
+        # # v_map = self.align_v(x) # BT x h x w x 512
+        # _, h, w, c = v_map.shape
+        # v_map = v_map.view(B, T, h, w, c) # [B, T, h, w, c]
+        v_map = imgs.permute(0, 1, 3, 4, 2) # [B, T, 7, 7, 1024]
         # psp
         event_logits, category_logits, avps, fusion, final_v_fea, final_a_fea = self.psp(v_map, audio,)
         
@@ -406,16 +413,17 @@ class weakly_resnet_psp_net(nn.Module):
         self.psp = weakly_psp_net(vis_fea_type=self.vis_fea_type, a_dim=128, v_dim=v_dim, thr_val=self.thr_val, category_num=category_num)
 
     def forward(self, imgs, audio):
-        # imgs: [B, T, 1024, 7, 7]
+        # imgs: [B, T, 2048, 7, 7]
         # audio_lm: [B, T, 128]
         # get visual feature map for psp
-        B, T, C, H, W = imgs.shape
-        x = imgs.reshape(-1, C, H, W) # [BT, 1024, H, W]
-        x = x.permute(0, 2, 3, 1) # [BT, H, W, 1024]
-        v_map = self.align_v(x) # BT x h x w x 512
-        # print('v_map.shape: ', v_map.shape)
-        _, h, w, c = v_map.shape
-        v_map = v_map.view(B, T, h, w, c) # [B, T, h, w, c]
+        # B, T, C, H, W = imgs.shape
+        # x = imgs.reshape(-1, C, H, W) # [BT, 1024, H, W]
+        # x = x.permute(0, 2, 3, 1) # [BT, H, W, 1024]
+        # v_map = self.align_v(x) # BT x h x w x 512
+        # # print('v_map.shape: ', v_map.shape)
+        # _, h, w, c = v_map.shape
+        # v_map = v_map.view(B, T, h, w, c) # [B, T, h, w, c]
+        v_map = imgs.permute(0, 1, 3, 4, 2) # [B, T, 7, 7, 1024]
 
         # psp
         fusion, event_logits, category_logits, predict_video_labels, final_a_fea, final_v_fea = self.psp(v_map, audio,)
@@ -433,26 +441,20 @@ if __name__ == "__main__":
     thre_val = 0.095
     audio = torch.randn(B, T, 128)
     vis_fea_type = 'resnet'
-    # if vis_fea_type == 'vgg':
-    #     video = torch.randn(B, 10, 7, 7, 512)
-    #     category_num = 28
-    # else:
-    #     video = torch.randn(B, 10, 7, 7, 1024)
-    #     category_num = 141
-    # fully_model = fully_psp_net(vis_fea_type=vis_fea_type, category_num=category_num, thr_val=thre_val)
-    # weakly_model = weakly_psp_net(vis_fea_type=vis_fea_type, category_num=category_num, thr_val=thre_val)
-    
+    model_name = 'cpsp'
 
     if vis_fea_type == 'vgg':
-        video = torch.randn(B, 10, 512, 7, 7)
+        video = torch.randn(B, 10, 7, 7, 512)
         category_num = 28
+        fully_model = fully_psp_net(vis_fea_type=vis_fea_type, flag=model_name, category_num=category_num, thr_val=thre_val)
+        weakly_model = weakly_psp_net(vis_fea_type=vis_fea_type, flag=model_name, category_num=category_num, thr_val=thre_val)
+    
     else:
         video = torch.randn(B, 10, 1024, 7, 7)
         category_num = 141
-    model_name = 'sspsp'
-    fully_model = resnet_psp_net(vis_fea_type=vis_fea_type, flag=model_name, category_num=category_num, thr_val=thre_val)
-    weakly_model = weakly_resnet_psp_net(vis_fea_type=vis_fea_type, flag=model_name, category_num=category_num, thr_val=thre_val)
-        
+        fully_model = resnet_psp_net(vis_fea_type=vis_fea_type, flag=model_name, category_num=category_num, thr_val=thre_val)
+        weakly_model = weakly_resnet_psp_net(vis_fea_type=vis_fea_type, flag=model_name, category_num=category_num, thr_val=thre_val)
+            
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     fully_model.to(device)
@@ -460,11 +462,15 @@ if __name__ == "__main__":
     audio = audio.to(device)
     video = video.to(device)
 
-    if model_name == 'sspsp':
-        f1, f2, f3, f4 = fully_model(video, audio)
-        w1, w2, w3, w4, w5 = weakly_model(video, audio)
-    else:
+    if vis_fea_type == 'vgg':
         f1, f2, f3, f4 = fully_model(video, audio)
         w1, w2, w3, w4 = weakly_model(video, audio)
+    else:
+        if model_name == 'sspsp':
+            f1, f2, f3, f4 = fully_model(video, audio)
+            w1, w2, w3, w4, w5 = weakly_model(video, audio)
+        else:
+            f1, f2, f3, f4 = fully_model(video, audio)
+            w1, w2, w3, w4 = weakly_model(video, audio)
     
     pdb.set_trace()
