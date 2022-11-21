@@ -1,4 +1,7 @@
-#### This repository introduces a newly collected large-scale dataset VGGSound-AVEL100k for audio-visual event localization task and contains some baseline methods for localization and video parsing tasks. It assembles the [AVEL](https://github.com/YapengTian/AVE-ECCV18), [AVSDN](https://arxiv.org/pdf/1902.07473.pdf), [CMRAN](https://github.com/FloretCat/CMRAN), [PSP](https://github.com/jasongief/PSP_CVPR_2021), and implements the CPSP and SSPSP methods.
+#### This repository introduces a newly collected large-scale dataset VGGSound-AVEL100k for audio-visual event localization task and contains some baseline methods for localization and video parsing tasks. It assembles the [AVEL](https://github.com/YapengTian/AVE-ECCV18), [AVSDN](https://arxiv.org/pdf/1902.07473.pdf), [CMRAN](https://github.com/FloretCat/CMRAN), [PSP](https://github.com/jasongief/PSP_CVPR_2021), and implements the CPSP and SSPSP methods. 
+
+#### [Update 2022.11.21] The CPSP method is extended from our previous work PSP and finally accepted to TPAMI, please refer to the arxiv paper for more details: [https://arxiv.org/pdf/2211.09980.pdf](https://arxiv.org/pdf/2211.09980.pdf)
+
 -----
 
 ### VGGSound-AVEL100k: A large-scale dataset for audio-visual event localization
@@ -14,9 +17,7 @@ A comparison of the AVE and VGGSound-AVEL100k datasets can be seen in the follow
 
 **Dataset statistics.** A full list of the category names and video number of each category can be seen from [here](https://drive.google.com/file/d/1gFZAKKHE35OJ58jjx7d2F1REu_DilSoI/view?usp=sharing).
 
-**Label annotation details.** The category label can be easily obtained from the video tags, and the temporal event labels (audio-visual correspondence labels) are manually labeled by outsourcing. There are around thirty annotators participating in the labeling process. Similar to the annotation process of the AVE dataset, for each video in VGGSound-AVEL100k, each annotator is required to watch through the entire video and label each video segment: if one event simultaneously occurs in both audio and visual channels, the label for the current segment is “1”, otherwise “0”. Also, if an object is hard to see in the visual image or the sound is too low or with much noise, the annotator may label the segment as invisible or inaudible. To ensure the quality of labeling, the labeling team is required to randomly select 60% of the annotated data at least and manually checked it again. The entire annotation process took about half past one month.
-
-**Downloads**. The VGGSound-AVEL100k is available [here](https://drive.google.com/drive/folders/1en1dks1GYiGaDS9Ar-QtJmmyoOdzEsQj?usp=sharing). You may need to extract the audio-visual features by yourself because the file size is too large so we do not upload the features. The audio and visual features are extracted by the pretrained VGGish and VGG-19 networks respectively. The users can extract them by themselves and some helpful scripts can be found in [AVEL](https://github.com/YapengTian/AVE-ECCV18). 
+**Downloads**. The VGGSound-AVEL100k is available [here](https://drive.google.com/drive/folders/1en1dks1GYiGaDS9Ar-QtJmmyoOdzEsQj?usp=sharing). You may need to extract the audio-visual features by yourself because the file size is too large so we do not upload the features. The audio and visual features are extracted by the pretrained VGGish and VGG-19 networks respectively. The users can extract them by themselves and some helpful scripts can be found in [AVEL](https://github.com/YapengTian/AVE-ECCV18). **Note**: We also provide a relatively lightweight version of the VGGSound-AVEL100k dataset, called VGGSound-AVEL50k, to meet the flexible needs of researchers. VGGSound-AVEL50k still covers 141 event categories but only **half** as many videos as VGGSound-AVEL100k. For each event category, we randomly select 50% of videos from VGGSound-AVEL100k. This yields a total of 50,543 videos and the train/validation/test split of the videos remains the same as for VGGSound-AVEL100k. VGGSound-AVEL50k can be downloaded from [here](https://drive.google.com/drive/folders/1651uLMPRB-tOz3sEun_DWo9WefxsVPAF?usp=sharing). We highly recommend to use VGGSound-AVEL50k dataset as we found that it has higher-quality annotations.
 
 -----
 ### The CPSP method for AVEL
@@ -59,12 +60,11 @@ We also provide the pretrained psp/cpsp models for these tasks, you can download
 ### Citation
 Please consider cite following paper if it is helpful in your research or projects:
 ```
-@inproceedings{chen2020vggsound,
-  title={Vggsound: A large-scale audio-visual dataset},
-  author={Chen, Honglie and Xie, Weidi and Vedaldi, Andrea and Zisserman, Andrew},
-  booktitle={ICASSP 2020-2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
-  pages={721--725},
-  year={2020}
+@inproceedings{zhou2022cpsp,
+  title={Contrastive Positive Sample Propagation along the Audio-Visual Event Line},
+  author={Zhou, Jinxing and Guo, Dan and Wang, Meng},
+  journal={arXiv preprint arXiv:2211.09980},
+  year={2022}
 }
 
 @inproceedings{zhou2021psp,

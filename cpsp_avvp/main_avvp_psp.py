@@ -29,6 +29,37 @@ class LabelSmoothingLoss(nn.Module):
         return torch.mean(torch.sum(-true_dist * pred, dim=self.dim))
 
 
+class VconInfoLoss(nn.Module):
+    def __init__(self, ratio=0.8, eta=0.1):
+        super(VconInfoLoss, self).__init__()
+        self.ratio = ratio
+        self.eta = eta
+
+    def forward(self, video_fea, target):
+        # video_fea: [B, 10, 2, 512]
+        # target: [B, 25]
+        video_fea = video_fea.mean(2).mean(1) # [B, 512]
+        video_fea = F.normalize(video_fea, dim=-1) # [B, 512]
+        cos_simm = torch.mm(video_fea, video_fea.t()) # [B, B]
+        cos_simm_t = cos_simm / self.eta
+        cos_simm_exp = torch.exp(cos_simm_t) # [B, B]
+
+        flag = torch.mm(target, target.permute(1,0)) # [B, B]
+        neg_flag = (flag == 0).float() # [B, B]
+        pos_flag = ((flag / torch.sum(target, dim=-1, keepdim=True)) >= self.ratio).float() # [B, B]
+        neg_num = torch.sum(neg_flag, dim=-1, keepdim=True) # [B]
+        pos_num = torch.sum(pos_flag, dim=-1, keepdim=True) # [B]
+        pos_item = torch.sum(pos_flag * cos_simm_exp, dim=1, keepdim=True) / pos_num
+        neg_item = torch.sum(neg_flag * cos_simm_exp, dim=1, keepdim=True) / neg_num
+
+        # pos_item = torch.sum(pos_flag * cos_simm_exp, dim=1, keepdim=True) / (pos_num + 1e-8)
+        # neg_item = torch.sum(neg_flag * cos_simm_exp, dim=1, keepdim=True) / (neg_num + 1e-8)
+
+        batch_loss = (-1) * torch.log(pos_item / (pos_item +  neg_item))
+        loss = batch_loss.mean()
+        # pdb.set_trace()
+        return loss
+
 
 def train(args, model, train_loader, optimizer, criterion, epoch):
     model.train()
