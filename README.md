@@ -60,11 +60,13 @@ We also provide the pretrained psp/cpsp models for these tasks, you can download
 ### Citation
 Please consider cite following paper if it is helpful in your research or projects:
 ```
-@article{zhou2022cpsp,
-  title={Contrastive Positive Sample Propagation along the Audio-Visual Event Line},
-  author={Zhou, Jinxing and Guo, Dan and Wang, Meng},
-  journal={arXiv preprint arXiv:2211.09980},
-  year={2022}
+@ARTICLE{zhou2022,
+    author={Zhou, Jinxing and Guo, Dan and Wang, Meng},  
+    journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},   
+    title={Contrastive Positive Sample Propagation along the Audio-Visual Event Line},   
+    year={2022},  
+    pages={1-18},  
+    doi={10.1109/TPAMI.2022.3223688}
 }
 
 @inproceedings{zhou2021psp,
