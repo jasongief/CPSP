@@ -1,7 +1,5 @@
 #### This repository introduces a newly collected large-scale dataset VGGSound-AVEL100k for audio-visual event localization task and contains some baseline methods for localization and video parsing tasks. It assembles the [AVEL](https://github.com/YapengTian/AVE-ECCV18), [AVSDN](https://arxiv.org/pdf/1902.07473.pdf), [CMRAN](https://github.com/FloretCat/CMRAN), [PSP](https://github.com/jasongief/PSP_CVPR_2021), and implements the CPSP and SSPSP methods. 
 
-#### [Update 2022.11.21] The CPSP method is extended from our previous work PSP and finally accepted to TPAMI, please refer to the arxiv paper for more details: [https://arxiv.org/pdf/2211.09980.pdf](https://arxiv.org/pdf/2211.09980.pdf)
-
 -----
 
 ### VGGSound-AVEL100k: A large-scale dataset for audio-visual event localization
@@ -60,13 +58,12 @@ We also provide the pretrained psp/cpsp models for these tasks, you can download
 ### Citation
 Please consider cite following paper if it is helpful in your research or projects:
 ```
-@ARTICLE{zhou2022CPSP,
-    author={Zhou, Jinxing and Guo, Dan and Wang, Meng},  
-    journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},   
-    title={Contrastive Positive Sample Propagation along the Audio-Visual Event Line},   
-    year={2022},  
-    pages={1-18},  
-    doi={10.1109/TPAMI.2022.3223688}
+@inproceedings{chen2020vggsound,
+  title={Vggsound: A large-scale audio-visual dataset},
+  author={Chen, Honglie and Xie, Weidi and Vedaldi, Andrea and Zisserman, Andrew},
+  booktitle={ICASSP 2020-2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  pages={721--725},
+  year={2020}
 }
 
 @inproceedings{zhou2021PSP,
