@@ -73,4 +73,12 @@ Please consider cite following paper if it is helpful in your research or projec
   pages={8436--8444},
   year={2021}
 }
+
+@article{zhou2022CPSP,
+  title={Contrastive Positive Sample Propagation along the Audio-Visual Event Line},
+  author={Zhou, Jinxing and Guo, Dan and Wang, Meng},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2022},
+  publisher={IEEE}
+}
 ```
